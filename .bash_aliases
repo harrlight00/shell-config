@@ -1,9 +1,3 @@
-alias sshdv='ssh dvdas001-dev3'
-alias sshdas='ssh pexdas001-dev3'
-alias sshdev='ssh pexdev001-dev3'
-alias sshtestfiles='ssh gsgd@test-files.payment-express.net'
-alias sshmq='ssh gsgmq001-dev3'
-
 alias cd-='cd -'
 alias cd..='cd ..'
 alias cm='cvs -q commit'
