@@ -5,7 +5,6 @@ au BufNewFile,BufRead *.xhtml set ft=tt2html
 au BufNewFile,BufRead */template/* set ft=tt2html
 au BufNewFile,BufRead *.tt set ft=tt2html
 au BufNewFile,BufRead *.scss set ft=css
-" or better yet install https://github.com/cakebaker/scss-syntax.vim
 
 colorscheme zellner
 
