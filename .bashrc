@@ -1,8 +1,3 @@
-# This is a shared bashrc file.
-# You can
-# 1) source this from your own .bashrc, ie. `. ~/dev/templates/shared_bashrc.sh`
-# 2) copy this to your own .bashrc (which allows for easier customization, but
-#    you lose out on nice additions)
 if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
@@ -13,7 +8,6 @@ export CVSEDITOR="vim"
 export CVS_RSH="ssh"
 export SVKROOT="/var/lib/svk"
 export SVN_EDITOR="vim"
-# export GNUPGHOME="/var/www/.gnupg" # optional
 git_branch() {
     GIT_DIR=`git rev-parse --git-dir 2> /dev/null`
     if [ $? == 0 ]; then
@@ -24,43 +18,10 @@ git_branch() {
 PS1='\[\e]0;\u@\h:\w\007\][$(date +%H:%M)]-[\u@\h: \[\e[0;32m\]\w\[\e[0m\]\[\e[0;36m\] ${GIT_BRANCH}\[\e[0;00m\]]\$ '
 PROMPT_COMMAND=$'GIT_BRANCH=$(git_branch)'
 PATH="$HOME/dev/utils:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11"
-# uncomment the line below only if you work on TaxSys extensively
-# PATH="/usr/local/gsgperl/tax-cbs/bin:$PATH"
 export PATH PS1 PROMPT_COMMAND
-# 'back 4' takes you back 4 directories.
-back ()
-{ 
-    x=0 
-    levels="" 
-    while [ $x -lt $1 ]
-        do
-        levels="${levels}../"
-        x=$[$x+1]
-    done 
-    cd $levels
-}
-
-# pvi Time::Local::Extended
-pvi ()
-{
-    local file;
-    file=$(perldoc -l $1);
-    if [[ "$?" == "0" ]]; then
-        vim $file;
-    fi
-}
 
 # use man to get perldocs for Lots::Of::GSG::Modules
 export MANPATH=/usr/local/gsgperl/gsg-epay/active/man:/usr/local/share/man:/usr/share/man/en:/usr/share/man
-
-alias cu='cvs -q update -dP'
-alias cm='cvs -q commit'
-alias rs='sudo /usr/local/sbin/httpdctl --restart --cvs'
-alias m='mysql -h devdb01m -u dbadmin --password=dba4dev01'
-alias td='tail_all -S -c dev'
-alias d='svk diff'
-alias dd='svkc diff'
-alias dn='cvs -q diff -buBwN'
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
@@ -70,62 +31,6 @@ alias dn='cvs -q diff -buBwN'
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
- 
-# Tab completion for user names on gitc submit|user-history and JIRA tickets on gitc open|edit|review
-__gitc_complete() {
-    compopt +o nospace; 
-    case "$COMP_CWORD" in
-    1)
-        COMPREPLY=($(compgen -c "gitc-${COMP_WORDS[1]}" | sed s/gitc-//g ))
-        ;;
-    2)
-        case "${COMP_WORDS[1]}" in
-        submit)
-            COMPREPLY=($(compgen -u ${COMP_WORDS[2]} ))
-            ;;
-        open | edit )
-            COMPREPLY=($(dev-perl -MGSG::Gitc::Util=its -le '
-                my $prefix = shift;
-                my $jql = "assignee = currentUser() AND resolution = Unresolved ORDER BY updatedDate DESC";
-                my $issues = its("jira")->get_jira_rest_object->search($jql)->{issues} || [];
-                print for grep { /^\Q$prefix/ } map { $_->{key} } @$issues;
-            ' "${COMP_WORDS[2]}"))
-            ;;
-        review )
-            COMPREPLY=($(dev-perl -MGSG::Gitc::Util=its -le '
-                my $prefix = shift;
-                my $jql = q{resolution = Unresolved AND status = "in development" AND gitc ~ "pending review" and reviewer ~ currentUser() ORDER BY updatedDate DESC};
-                my $issues = its("jira")->get_jira_rest_object->search($jql)->{issues} || [];
-                print for grep { /^\Q$prefix/ } map { $_->{key} } @$issues;
-            ' "${COMP_WORDS[2]}"))
-            ;;
-        setup)
-            COMPREPLY=($(gitc-projects 2>/dev/null | grep "^${COMP_WORDS[2]}"))
-                          ;;
-        esac
-        ;;
-    3)
-        case "${COMP_WORDS[1]}" in
-        setup)
-            COMPREPLY=($(echo "${COMP_WORDS[2]}" | grep "^${COMP_WORDS[3]}"))
-            compopt -o nospace; 
-            ;;
-        user-history)
-            COMPREPLY=($(compgen -u ${COMP_WORDS[3]} ))
-            ;;
-        esac
-        ;;
-    esac
-}
-complete -F __gitc_complete gitc
- 
-_bin_run_coverage_tests() 
-{ 
-    local cur=${COMP_WORDS[COMP_CWORD]} 
-    COMPREPLY=( $(compgen -W '--uncommitted --verbose --critic --no-critic --no-config --all' -- $cur) ) 
-} 
-complete -F _bin_run_coverage_tests bin/run_coverage_tests.pl 
-
 
 #===============================================================================
 # Font generated at
@@ -202,30 +107,16 @@ git_branch() {
 dynamic_prompt() {
     GIT_BRANCH=$(git_branch)
     if [ "$USER" == 'root' ] ; then
-        echo "$purple[\D{%w}.\t] $redwh\u$white@\h$cyan:$blue\w$yellow\$$reset "
+        echo "$purple[\D{%w}.\t] $redwh\u$green@\h$cyan:$blue\w$yellow\$$reset "
     else
         if [ "$GIT_BRANCH" == '' ] ; then
-            echo "$purple[\D{%w}.\t] $white\u@\h$cyan:$blue\w$yellow\$$reset "
+            echo "$purple[\D{%w}.\t] $green\u@\h$cyan:$blue\w$yellow\$$reset "
         else
-            echo "$purple[\D{%w}.\t] $white\u@\h$cyan:$blue\w$yellow (${GIT_BRANCH})\$$reset "
+            echo "$purple[\D{%w}.\t] $green\u@\h$cyan:$blue\w$yellow (${GIT_BRANCH})\$$reset "
         fi
     fi
 }
 export PROMPT_COMMAND=$PROMPT_COMMAND$'; PS1=$(dynamic_prompt)'
 
-# Allow developers to add additional things to their .bashrc via a .bashrc.d directory.
-# Each file will be read from the directory and sourced.
-
-if [ -d ~/.bashrc.d ]; then
-    for BASHFILE in $(find ~/.bashrc.d -type f)
-    do
-        . $BASHFILE
-    done
-fi
-
 # Looks like this (with color):
 # [1.11:39:14] login@dev03:~/gsg-repo (XXX-1234)$
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
