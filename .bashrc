@@ -3,9 +3,6 @@ if [ -f /etc/bashrc ]; then
 fi
 
 export EDITOR="vim"
-export CVSROOT="/var/lib/cvs"
-export CVSEDITOR="vim"
-export CVS_RSH="ssh"
 export SVKROOT="/var/lib/svk"
 export SVN_EDITOR="vim"
 git_branch() {
